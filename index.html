@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Александра — Колорист</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            background-color: #111;
+            scroll-behavior: smooth; 
+        }
+
+        /* --- СЕКЦИИ --- */
+        .fullscreen-section {
+            position: relative;
+            height: 100vh; width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-image {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1;
+            /* Эффект размытия фона */
+            filter: blur(6px); 
+            transform: scale(1.08); 
+        }
+
+        .hero-bg-image {
+            filter: blur(2px); 
+            transform: scale(1.02);
+        }
+
+        /* Затемнение фона (с плавным переходом) */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); 
+            z-index: 2;
+            transition: background 0.8s ease; 
+        }
+
+        /* Когда секция активна, фото плавно затемняется */
+        .fullscreen-section.active-section .overlay {
+            background: rgba(0, 0, 0, 0.75); 
+        }
+
+        /* ГЛАВНЫЙ ЭКРАН */
+        .hero-content {
+            position: relative; z-index: 3; text-align: center; max-width: 800px; padding: 20px;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5em; margin-bottom: 15px; letter-spacing: 3px; text-transform: uppercase; font-weight: 300;
+        }
+        .hero-content h1 span { font-weight: 700; color: #e0d1b8; }
+        .hero-content .subtitle { font-size: 1.2em; margin-bottom: 40px; color: #ddd; font-weight: 300; }
+
+        .glass-box {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .glass-box p { margin-bottom: 12px; font-size: 1.1em; }
+        .glass-box .highlight { color: #e0d1b8; font-weight: 600; margin-top: 20px; text-transform: uppercase; font-size: 0.9em; }
+        .glass-box ul { list-style: none; padding-left: 0; }
+        .glass-box li { margin-bottom: 10px; padding-left: 25px; position: relative; }
+        .glass-box li::before { content: '—'; color: #e0d1b8; position: absolute; left: 0; font-weight: bold; }
+
+        /* КНОПКИ СОЦСЕТЕЙ */
+        .social-links { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn {
+            display: inline-block; padding: 15px 35px; border-radius: 50px; text-decoration: none;
+            color: #fff; font-weight: 600; font-size: 0.9em; text-transform: uppercase;
+            transition: all 0.4s ease;
+        }
+        .btn:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        .btn-tg { background-color: #0088cc; }
+        .btn-vk { background-color: #4C75A3; }
+        .btn-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        /* СТРЕЛКА ВНИЗ */
+        .scroll-down {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 3; color: #fff; font-size: 1.5em; animation: bounce 2s infinite; text-decoration: none;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-15px) translateX(-50%); }
+            60% { transform: translateY(-7px) translateX(-50%); }
+        }
+
+        /* БЛОКИ С УСЛУГАМИ */
+        .text-overlay {
+            position: absolute; z-index: 3; bottom: 10%; left: 5%; right: 5%; max-width: 800px; margin: 0 auto;
+            background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 30px 40px; border-radius: 15px; border-left: 4px solid #e0d1b8;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease;
+            text-align: center;
+        }
+        .text-overlay.active { opacity: 1; transform: translateY(0); }
+
+        .service-title { font-size: 1.4em; font-weight: 600; color: #e0d1b8; margin-bottom: 10px; }
+        .service-desc { font-size: 1em; color: #ccc; margin-bottom: 20px; line-height: 1.5; font-style: italic;}
+        .service-info { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; font-size: 1.1em; color: #fff; font-weight: bold; }
+        
+        .btn-book {
+            background-color: #e0d1b8; color: #111; padding: 12px 30px; font-size: 1em;
+            border-radius: 50px; font-weight: 700; text-transform: uppercase; text-decoration: none; display: inline-block; transition: 0.3s;
+        }
+        .btn-book:hover { background-color: #fff; transform: translateY(-3px); }
+
+        /* КНОПКА "ГЛАЗ" */
+        .eye-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%); 
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none; 
+        }
+
+        .eye-icon-svg {
+            width: 80px; 
+            height: 80px;
+            fill: #cccccc; 
+            opacity: 0.85;
+            filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); 
+        }
+
+        /* ПОДВАЛ */
+        .footer-section {
+            background-color: #0a0a0a; padding: 40px 20px; text-align: center;
+            border-top: 1px solid #222; position: relative; z-index: 10;
+        }
+        .license-link { color: #e0d1b8; text-decoration: underline; font-size: 1.1em; transition: color 0.3s; }
+        .license-link:hover { color: #fff; }
+        .footer-text { color: #666; font-size: 0.9em; margin-top: 10px; }
+
+        /* АДАПТИВНОСТЬ ДЛЯ ВСЕХ УСТРОЙСТВ */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 2.5em; }
+            .text-overlay { 
+                padding: 20px; 
+                bottom: 5%; 
+                left: 4%; 
+                right: 4%; 
+            }
+            .service-title { font-size: 1.1em; }
+            .service-info { flex-direction: column; gap: 5px; }
+            .eye-button { transform: translate(-50%, -58%); }
+            .eye-icon-svg { width: 60px; height: 60px; }
+            .glass-box { padding: 25px; }
+            .social-links { gap: 10px; }
+            .btn { padding: 10px 20px; font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН 1: ГЛАВНАЯ -->
+    <section class="fullscreen-section">
+        <img src="роха мастера.jpg" class="bg-image hero-bg-image" alt="Александра">
+        <div class="overlay"></div>
+        <div class="hero-content">
+            <h1>Приветствую. <br><span>Я Александра</span></h1>
+            <p class="subtitle">Колорист, эксперт по сложным техникам окрашивания ✨</p>
+            
+            <div class="glass-box">
+                <p>Опыт работы более 9 лет 🚀</p>
+                <p>Принимаю в уютной студии в центре города.</p>
+                <p>Работаю с теми, кто ценит качество, современный подход и действительно дорогой результат.</p>
+                <p class="highlight">Мои направления:</p>
+                <ul>
+                    <li>Сложные техники (AirTouch, рельеф, шитьё седины)</li>
+                    <li>Микромелирование</li>
+                    <li>Исправление неудачных окрашиваний</li>
+                    <li>СПА и уходовые процедуры</li>
+                </ul>
+            </div>
+            <div class="social-links">
+                <a href="https://t.me/alexsa_hair_35" class="btn btn-tg" target="_blank">Telegram</a>
+                <a href="https://vk.ru/alexsa_cher35" class="btn btn-vk" target="_blank">ВКонтакте</a>
+                <a href="https://www.instagram.com/alexa_colorist1" class="btn btn-ig" target="_blank">Instagram</a>
+            </div>
+        </div>
+        <a href="#service1" class="scroll-down">↓</a>
+    </section>
+
+    <!-- УСЛУГА 1 -->
+    <section class="fullscreen-section" id="service1">
+        <img src="https://f2.dikidi.net/c18/v17505/2g9nbkkgd0.jpg" class="bg-image">
+        <div class="overlay"></div>
+        
+        <div class="eye-button">
+            <svg class="eye-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </div>
+
+        <div class="text-overlay">
+            <div class="service-title">Окрашивание в один тон / седина (не блонд)</div>
+            <div class="service-desc">Растяжка цвета красителем с мягким переходом от натуральных корней к красивым бежевым оттенкам по длине.</div>
+            <div class="service-info">
+                <span>⏱ 2 ч 30 мин</span>
+                <span>💰 От 6 000 RUB</span>
+            </div>
+            <a href="https://dikidi.net/ru/profile/481527/service/5714471" target="_blank" class="btn-book">Записаться</a>
+        </div>
+    </section>
+
+    <!-- УСЛУГА 2 -->
+    <section class="fullscreen-section">
+        <img src="https://f2.dikidi.net/c28/v27891/4diarti8cv.jpg" class="bg-image">
+        <div class="overlay"></div>
+        
+        <div class="eye-button">
+            <svg class="eye-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </div>
+
+        <div class="text-overlay">
+            <div class="service-title">Сложные техники окрашивания</div>
+            <div class="service-desc">Тонкости AirTouch, нюансы работы и те детали, которые напрямую влияют на качество результата. Для меня важно передать понимание каждого этапа.</div>
+            <div class="service-info">
+                <span>⏱ 4 ч</span>
+                <span>💰 От 10 000 RUB</span>
+            </div>
+            <a href="https://dikidi.net/ru/profile/481527/service/5714517" target="_blank" class="btn-book">Записаться</a>
+        </div>
+    </section>
+
+    <!-- УСЛУГА 3 -->
+    <section class="fullscreen-section">
+        <img src="https://f2.dikidi.net/c27/v26199/2484u5m86h.jpg" class="bg-image">
+        <div class="overlay"></div>
+        
+        <div class="eye-button">
+            <svg class="eye-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </div>
+
+        <div class="text-overlay">
+            <div class="service-title">Процедура «Идеальный уход»</div>
+            <div class="service-desc">Многие забывают о коже головы! Со временем на ней накапливаются себум и остатки средств. Именно с неё начинается грамотный уход за волосами.</div>
+            <div class="service-info">
+                <span>⏱ 1 ч 30 мин</span>
+                <span>💰 От 3 500 RUB</span>
+            </div>
+            <a href="https://dikidi.net/ru/profile/481527/service/6532739" target="_blank" class="btn-book">Записаться</a>
+        </div>
+    </section>
+
+    <!-- УСЛУГА 4 -->
+    <section class="fullscreen-section">
+        <img src="https://f2.dikidi.net/c27/v26199/mma66crrg5.jpg" class="bg-image">
+        <div class="overlay"></div>
+        
+        <div class="eye-button">
+            <svg class="eye-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </div>
+
+        <div class="text-overlay">
+            <div class="service-title">Микромелирование</div>
+            <div class="service-desc">Рельефное окрашивание с сохранением глубины натурального цвета, мягкими переходами и красивыми переливами бежевых оттенков. Без резких полос.</div>
+            <div class="service-info">
+                <span>⏱ 3 ч</span>
+                <span>💰 От 8 000 RUB</span>
+            </div>
+            <a href="https://dikidi.net/ru/profile/481527/service/20906517" target="_blank" class="btn-book">Записаться</a>
+        </div>
+    </section>
+
+    <!-- УСЛУГА 5 -->
+    <section class="fullscreen-section">
+        <img src="https://f2.dikidi.net/c16/v15575/3e5eb7s7m2.jpg" class="bg-image">
+        <div class="overlay"></div>
+        
+        <div class="eye-button">
+            <svg class="eye-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </div>
+
+        <div class="text-overlay">
+            <div class="service-title">Тонирование блонда</div>
+            <div class="service-desc">Придание волосам благородного оттенка, нейтрализация желтизны и свежий, ухоженный вид.</div>
+            <div class="service-info">
+                <span>⏱ 1 ч 20 мин</span>
+                <span>💰 От 5 000 RUB</span>
+            </div>
+            <a href="https://dikidi.net/ru/profile/aleksandra_481527" target="_blank" class="btn-book">Записаться</a>
+        </div>
+    </section>
+
+    <!-- ПОДВАЛ -->
+    <footer class="footer-section" id="footer">
+        <a href="license.html" class="license-link">Лицензии и разрешения</a>
+        <p class="footer-text">© Александра — Колорист. Все права защищены.</p>
+    </footer>
+
+    <!-- СКРИПТЫ -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const section = entry.target.closest('.fullscreen-section');
+                
+                if (entry.isIntersecting) {
+                    if(section) section.classList.add('active-section');
+                    entry.target.classList.add('active');
+                } else {
+                    if(section) section.classList.remove('active-section');
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('.text-overlay').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
